@@ -1,19 +1,16 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mini Sistema de Tickets de Soporte (Helpdesk)</title>
-</head>
-<body>
-  <h1>Mini Sistema de Tickets de Soporte (Helpdesk)</h1>
+# Mini Sistema de Tickets de Soporte (Helpdesk)
 
-  <h2>Integrantes del equipo</h2>
-  <ul>
-    <li>MARTÍNEZ SANDOVAL KARLA GABRIELA</li>
-    <li>GUZMAN CASTAÑEDA KARLA LIZETH</li>
-    <li>ORTEGA MENDOZA ALAN YAEL</li>
-    <li>ORTIZ GARCIA RAMIRO</li>
-  </ul>
-</body>
-</html>
+Proyecto desarrollado en Laravel y MySQL para la gestión de tickets de soporte.
+
+## Tecnologías
+- Laravel
+- PHP
+- MySQL
+- Ngrok
+- Git y GitHub
+
+## Propósito
+Permitir el registro, seguimiento y administración de solicitudes o incidencias mediante una aplicación web.
+
+## Estado actual
+Versión inicial del proyecto con evidencia de publicación segura mediante HTTPS usando ngrok.
