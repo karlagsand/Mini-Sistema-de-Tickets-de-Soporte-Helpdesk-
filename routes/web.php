@@ -7,6 +7,7 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PriorityController;
+use App\Http\Controllers\TicketStatusController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -38,6 +39,9 @@ Route::middleware(['auth'])->group(function () {
     ->middleware('role:Administrador');
 
     Route::resource('priorities', PriorityController::class)
+    ->middleware('role:Administrador');
+
+    Route::resource('ticket-statuses', TicketStatusController::class)
     ->middleware('role:Administrador');
 });
 
