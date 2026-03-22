@@ -75,6 +75,12 @@ class TicketStatusController extends Controller
 
     public function destroy(TicketStatus $ticket_status): RedirectResponse
     {
+        if ($ticket_status->tickets()->exists()) {
+            return redirect()
+                ->route('ticket-statuses.index')
+                ->with('error', 'No se puede eliminar el estado porque está siendo utilizado en uno o más tickets.');
+        }
+
         $ticket_status->delete();
 
         return redirect()

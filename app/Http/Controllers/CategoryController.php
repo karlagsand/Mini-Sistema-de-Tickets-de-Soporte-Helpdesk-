@@ -71,6 +71,12 @@ class CategoryController extends Controller
 
     public function destroy(Category $category): RedirectResponse
     {
+        if ($category->tickets()->exists()) {
+            return redirect()
+                ->route('categories.index')
+                ->with('error', 'No se puede eliminar la categoría porque está siendo utilizada en uno o más tickets.');
+        }
+
         $category->delete();
 
         return redirect()

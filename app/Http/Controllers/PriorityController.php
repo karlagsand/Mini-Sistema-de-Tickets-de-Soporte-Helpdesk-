@@ -71,6 +71,12 @@ class PriorityController extends Controller
 
     public function destroy(Priority $priority): RedirectResponse
     {
+        if ($priority->tickets()->exists()) {
+            return redirect()
+                ->route('priorities.index')
+                ->with('error', 'No se puede eliminar la prioridad porque está siendo utilizada en uno o más tickets.');
+        }
+
         $priority->delete();
 
         return redirect()

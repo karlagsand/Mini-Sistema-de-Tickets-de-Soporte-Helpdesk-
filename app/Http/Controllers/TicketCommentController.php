@@ -20,6 +20,14 @@ class TicketCommentController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
+        if ($user->isUserRole() && $ticket->created_by !== $user->id) {
+            abort(403, 'No autorizado para comentar este ticket.');
+        }
+
+        if ($user->isAgent() && !is_null($ticket->assigned_to) && $ticket->assigned_to !== $user->id) {
+            abort(403, 'No autorizado para comentar este ticket.');
+        }
+
         TicketComment::create([
             'ticket_id' => $ticket->id,
             'user_id' => $user->id,

@@ -96,6 +96,12 @@ class UserController extends Controller
                 ->with('error', 'No puedes eliminar tu propio usuario.');
         }
 
+        if ($user->createdTickets()->exists() || $user->assignedTickets()->exists() || $user->comments()->exists()) {
+            return redirect()
+                ->route('users.index')
+                ->with('error', 'No se puede eliminar el usuario porque tiene relación con tickets o comentarios registrados.');
+        }
+
         $user->delete();
 
         return redirect()

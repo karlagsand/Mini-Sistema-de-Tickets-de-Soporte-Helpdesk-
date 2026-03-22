@@ -21,7 +21,13 @@ class TicketController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        $query = Ticket::with(['category', 'priority', 'status', 'creator', 'assignee']);
+        $query = Ticket::with([
+            'category',
+            'priority',
+            'status',
+            'creator',
+            'assignee',
+        ]);
 
         if ($user->isUserRole()) {
             $query->where('created_by', $user->id);
@@ -118,9 +124,9 @@ class TicketController extends Controller
             'histories.changedBy',
         ]);
 
-        $agents = User::whereHas('role', fn ($q) => $q->where('name', 'Agente'))
-            ->orderBy('name')
-            ->get();
+        $agents = User::whereHas('role', function ($q) {
+            $q->where('name', 'Agente');
+        })->orderBy('name')->get();
 
         $statuses = TicketStatus::orderBy('sort_order')->get();
 
@@ -133,7 +139,11 @@ class TicketController extends Controller
         $user = Auth::user();
 
         if ($user->isUserRole()) {
-            abort(403);
+            abort(403, 'No autorizado para actualizar tickets.');
+        }
+
+        if ($user->isAgent() && !is_null($ticket->assigned_to) && $ticket->assigned_to !== $user->id) {
+            abort(403, 'No autorizado para actualizar este ticket.');
         }
 
         $request->validate([
@@ -141,13 +151,23 @@ class TicketController extends Controller
             'assigned_to' => ['nullable', 'exists:users,id'],
         ]);
 
+        if ($user->isAgent() && $request->filled('assigned_to') && (int) $request->assigned_to !== $user->id) {
+            return redirect()
+                ->route('tickets.show', $ticket)
+                ->with('error', 'Un agente solo puede autoasignarse tickets o trabajar con tickets ya asignados a su usuario.');
+        }
+
         $previousStatusId = $ticket->status_id;
         $notes = [];
         $statusChanged = false;
 
         if ($request->has('assigned_to')) {
-            $ticket->assigned_to = $request->filled('assigned_to') ? (int) $request->assigned_to : null;
-            $notes[] = 'Ticket asignado o reasignado';
+            $newAssignedTo = $request->filled('assigned_to') ? (int) $request->assigned_to : null;
+
+            if ($ticket->assigned_to !== $newAssignedTo) {
+                $ticket->assigned_to = $newAssignedTo;
+                $notes[] = 'Ticket asignado o reasignado';
+            }
         }
 
         if ($request->filled('status_id') && (int) $request->status_id !== (int) $ticket->status_id) {
@@ -175,7 +195,7 @@ class TicketController extends Controller
                 'new_status_id' => $ticket->status_id,
                 'changed_by' => $user->id,
                 'changed_at' => now(),
-                'notes' => implode(' | ', $notes),
+                'notes' => !empty($notes) ? implode(' | ', $notes) : 'Actualización de ticket',
             ]);
         }
 
@@ -190,7 +210,7 @@ class TicketController extends Controller
         $user = Auth::user();
 
         if (!$user->isAdmin()) {
-            abort(403);
+            abort(403, 'No autorizado para eliminar tickets.');
         }
 
         $ticket->delete();
