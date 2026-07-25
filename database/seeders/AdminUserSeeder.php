@@ -19,6 +19,8 @@ class AdminUserSeeder extends Seeder
                 'name' => 'Administrador General',
                 'password' => Hash::make('Admin12345*'),
                 'role_id' => $adminRole?->id,
+                'position_level' => 'director_general',
+                'attention_weight' => User::attentionWeightFor('director_general'),
                 'email_verified_at' => now(),
             ]
         );

@@ -1,24 +1,48 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-slate-800 leading-tight">Detalle de estado</h2>
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <h1 class="page-title">Detalle de estado</h1>
+                <p class="page-subtitle">Consulta de atributos del estado seleccionado.</p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <a href="{{ route('ticket-statuses.index') }}" class="app-btn-secondary">Volver</a>
+                <a href="{{ route('ticket-statuses.edit', $status) }}" class="app-btn-warning">Editar</a>
+            </div>
+        </div>
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
-                <p><span class="font-semibold">Nombre:</span> {{ $status->name }}</p>
-                <p><span class="font-semibold">Slug:</span> {{ $status->slug }}</p>
-                <p><span class="font-semibold">Orden:</span> {{ $status->sort_order }}</p>
-                <p><span class="font-semibold">Cierra ticket:</span> {{ $status->is_closed ? 'Sí' : 'No' }}</p>
-                <p><span class="font-semibold">Creado:</span> {{ $status->created_at?->format('d/m/Y H:i') }}</p>
+        <div class="page-wrap">
+            <section class="app-card p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="info-panel">
+                        <p class="info-label">Nombre</p>
+                        <p class="info-value">{{ $status->name }}</p>
+                    </div>
 
-                <div class="pt-4">
-                    <a href="{{ route('ticket-statuses.index') }}"
-                       class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 transition">
-                        Volver
-                    </a>
+                    <div class="info-panel">
+                        <p class="info-label">Slug</p>
+                        <p class="info-value">{{ $status->slug }}</p>
+                    </div>
+
+                    <div class="info-panel">
+                        <p class="info-label">Orden</p>
+                        <p class="info-value">{{ $status->sort_order }}</p>
+                    </div>
+
+                    <div class="info-panel">
+                        <p class="info-label">Cierra ticket</p>
+                        <p class="info-value">{{ $status->is_closed ? 'Sí' : 'No' }}</p>
+                    </div>
+
+                    <div class="info-panel">
+                        <p class="info-label">Fecha de creación</p>
+                        <p class="info-value">{{ $status->created_at?->format('d/m/Y H:i') }}</p>
+                    </div>
                 </div>
-            </div>
+            </section>
         </div>
     </div>
 </x-app-layout>

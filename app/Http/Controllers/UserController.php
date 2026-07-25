@@ -8,13 +8,17 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class UserController extends Controller
 {
     public function index(): View
     {
-        $users = User::with('role')->latest()->paginate(10);
+        $users = User::with('role')
+            ->orderByDesc('attention_weight')
+            ->latest()
+            ->paginate(10);
 
         return view('users.index', compact('users'));
     }
@@ -22,24 +26,28 @@ class UserController extends Controller
     public function create(): View
     {
         $roles = Role::orderBy('name')->get();
+        $attentionLevels = User::attentionLevels();
 
-        return view('users.create', compact('roles'));
+        return view('users.create', compact('roles', 'attentionLevels'));
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role_id' => ['required', 'exists:roles,id'],
+            'position_level' => ['required', Rule::in(array_keys(User::attentionLevels()))],
         ]);
 
         User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role_id' => $request->role_id,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role_id' => $validated['role_id'],
+            'position_level' => $validated['position_level'],
+            'attention_weight' => User::attentionWeightFor($validated['position_level']),
             'email_verified_at' => now(),
         ]);
 
@@ -58,27 +66,31 @@ class UserController extends Controller
     public function edit(User $user): View
     {
         $roles = Role::orderBy('name')->get();
+        $attentionLevels = User::attentionLevels();
 
-        return view('users.edit', compact('user', 'roles'));
+        return view('users.edit', compact('user', 'roles', 'attentionLevels'));
     }
 
     public function update(Request $request, User $user): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'role_id' => ['required', 'exists:roles,id'],
+            'position_level' => ['required', Rule::in(array_keys(User::attentionLevels()))],
         ]);
 
         $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'role_id' => $request->role_id,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role_id' => $validated['role_id'],
+            'position_level' => $validated['position_level'],
+            'attention_weight' => User::attentionWeightFor($validated['position_level']),
         ];
 
         if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
+            $data['password'] = Hash::make($validated['password']);
         }
 
         $user->update($data);

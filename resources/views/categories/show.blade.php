@@ -1,23 +1,43 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-slate-800 leading-tight">Detalle de categoría</h2>
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <h1 class="page-title">Detalle de categoría</h1>
+                <p class="page-subtitle">Consulta de datos generales de la categoría.</p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <a href="{{ route('categories.index') }}" class="app-btn-secondary">Volver</a>
+                <a href="{{ route('categories.edit', $category) }}" class="app-btn-warning">Editar</a>
+            </div>
+        </div>
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
-                <p><span class="font-semibold">Nombre:</span> {{ $category->name }}</p>
-                <p><span class="font-semibold">Descripción:</span> {{ $category->description ?? 'Sin descripción' }}</p>
-                <p><span class="font-semibold">Estado:</span> {{ $category->is_active ? 'Activa' : 'Inactiva' }}</p>
-                <p><span class="font-semibold">Creada:</span> {{ $category->created_at?->format('d/m/Y H:i') }}</p>
+        <div class="page-wrap">
+            <section class="app-card p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="info-panel">
+                        <p class="info-label">Nombre</p>
+                        <p class="info-value">{{ $category->name }}</p>
+                    </div>
 
-                <div class="pt-4">
-                    <a href="{{ route('categories.index') }}"
-                       class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 transition">
-                        Volver
-                    </a>
+                    <div class="info-panel">
+                        <p class="info-label">Estado</p>
+                        <p class="info-value">{{ $category->is_active ? 'Activa' : 'Inactiva' }}</p>
+                    </div>
+
+                    <div class="info-panel md:col-span-2">
+                        <p class="info-label">Descripción</p>
+                        <p class="info-value">{{ $category->description ?: 'Sin descripción' }}</p>
+                    </div>
+
+                    <div class="info-panel">
+                        <p class="info-label">Fecha de creación</p>
+                        <p class="info-value">{{ $category->created_at?->format('d/m/Y H:i') }}</p>
+                    </div>
                 </div>
-            </div>
+            </section>
         </div>
     </div>
 </x-app-layout>

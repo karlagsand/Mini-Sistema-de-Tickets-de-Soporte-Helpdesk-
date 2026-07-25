@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -32,14 +33,25 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
+
+        $defaultRoleId = Role::where('name', 'Usuario')->value('id');
+
+        if (!$defaultRoleId) {
+            throw ValidationException::withMessages([
+                'email' => 'No se pudo registrar el usuario porque no existe el rol Usuario. Ejecuta los seeders del sistema.',
+            ]);
+        }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role_id' => $defaultRoleId,
+            'position_level' => 'operativo',
+            'attention_weight' => User::attentionWeightFor('operativo'),
         ]);
 
         event(new Registered($user));

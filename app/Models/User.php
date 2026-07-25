@@ -12,11 +12,32 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    public const ATTENTION_LEVELS = [
+        'director_general' => [
+            'label' => 'Director General',
+            'weight' => 100,
+        ],
+        'subdirector' => [
+            'label' => 'Subdirector',
+            'weight' => 80,
+        ],
+        'gerente' => [
+            'label' => 'Gerente',
+            'weight' => 60,
+        ],
+        'operativo' => [
+            'label' => 'Operativo',
+            'weight' => 20,
+        ],
+    ];
+
     protected $fillable = [
         'name',
         'email',
         'password',
         'role_id',
+        'position_level',
+        'attention_weight',
     ];
 
     protected $hidden = [
@@ -29,6 +50,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'attention_weight' => 'integer',
         ];
     }
 
@@ -65,5 +87,21 @@ class User extends Authenticatable
     public function isUserRole(): bool
     {
         return optional($this->role)->name === 'Usuario';
+    }
+
+    public static function attentionLevels(): array
+    {
+        return self::ATTENTION_LEVELS;
+    }
+
+    public static function attentionWeightFor(?string $level): int
+    {
+        return self::ATTENTION_LEVELS[$level]['weight'] ?? self::ATTENTION_LEVELS['operativo']['weight'];
+    }
+
+    public function attentionLabel(): string
+    {
+        return self::ATTENTION_LEVELS[$this->position_level ?? 'operativo']['label']
+            ?? self::ATTENTION_LEVELS['operativo']['label'];
     }
 }

@@ -9,10 +9,17 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        Role::insert([
-            ['name' => 'Administrador', 'description' => 'Gestiona todo el sistema', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Agente', 'description' => 'Atiende y da seguimiento a tickets', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Usuario', 'description' => 'Registra y consulta sus tickets', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        $roles = [
+            ['name' => 'Administrador', 'description' => 'Gestiona todo el sistema'],
+            ['name' => 'Agente', 'description' => 'Atiende y da seguimiento a tickets'],
+            ['name' => 'Usuario', 'description' => 'Registra y consulta sus tickets'],
+        ];
+
+        foreach ($roles as $role) {
+            Role::updateOrCreate(
+                ['name' => $role['name']],
+                ['description' => $role['description']]
+            );
+        }
     }
 }

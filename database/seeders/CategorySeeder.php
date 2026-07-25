@@ -3,17 +3,73 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\Ticket;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class CategorySeeder extends Seeder
 {
     public function run(): void
     {
-        Category::insert([
-            ['name' => 'Hardware', 'description' => 'Problemas físicos de equipo', 'is_active' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Software', 'description' => 'Problemas de programas o sistemas', 'is_active' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Red', 'description' => 'Conectividad e internet', 'is_active' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Accesos', 'description' => 'Credenciales, permisos y usuarios', 'is_active' => true, 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        $categories = [
+            'Accesos y permisos' => [
+                'description' => 'Contraseñas, cuentas, permisos, altas, bajas o acceso a sistemas.',
+                'aliases' => ['Accesos'],
+            ],
+            'Equipo de cómputo y periféricos' => [
+                'description' => 'Computadora, laptop, monitor, teclado, mouse, impresora u otro equipo físico.',
+                'aliases' => ['Hardware', 'Equipo de cómputo'],
+            ],
+            'Internet y red' => [
+                'description' => 'Conexión a internet, Wi-Fi, red interna, VPN o conectividad.',
+                'aliases' => ['Red'],
+            ],
+            'Sistemas y aplicaciones' => [
+                'description' => 'Problemas o dudas sobre sistemas internos, aplicaciones o programas.',
+                'aliases' => ['Software', 'Sistemas'],
+            ],
+            'Correo y herramientas de trabajo' => [
+                'description' => 'Correo electrónico, calendario, paquetería de oficina o herramientas colaborativas.',
+                'aliases' => [],
+            ],
+            'No estoy seguro' => [
+                'description' => 'Usar cuando no sea claro qué categoría corresponde. Soporte la clasificará.',
+                'aliases' => ['Otro', 'General'],
+            ],
+        ];
+
+        DB::transaction(function () use ($categories) {
+            $newCategories = [];
+
+            foreach ($categories as $name => $data) {
+                $newCategories[$name] = Category::updateOrCreate(
+                    ['name' => $name],
+                    [
+                        'description' => $data['description'],
+                        'is_active' => true,
+                    ]
+                );
+            }
+
+            foreach ($categories as $name => $data) {
+                $target = $newCategories[$name];
+
+                foreach ($data['aliases'] as $alias) {
+                    $old = Category::where('name', $alias)->first();
+
+                    if (!$old || $old->id === $target->id) {
+                        continue;
+                    }
+
+                    Ticket::where('category_id', $old->id)->update([
+                        'category_id' => $target->id,
+                    ]);
+
+                    $old->update([
+                        'is_active' => false,
+                    ]);
+                }
+            }
+        });
     }
 }
